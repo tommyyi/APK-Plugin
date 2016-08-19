@@ -100,8 +100,10 @@ public class MainActivity extends BaseActivity
             Class<?> UiTool = dexClassLoader.loadClass("com.dex.UiTool");
             Constructor constructor = UiTool.getConstructor();
             Object uiTool = constructor.newInstance();
+
             /*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
             UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
+
             Drawable drawable = uiToolInterface.getDrawable(this);
             view.setBackground(drawable);
         }
