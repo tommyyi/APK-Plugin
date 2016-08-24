@@ -10,8 +10,8 @@ import java.lang.reflect.Method;
 public class BaseActivity extends AppCompatActivity
 {
     private AssetManager mAssetManager;
-    private Resources mResources;
-    private Resources.Theme mTheme;
+    public Resources mResources;
+    public Resources.Theme mTheme;
 
     /**
      * 加载插件资源

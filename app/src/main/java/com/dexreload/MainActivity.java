@@ -1,6 +1,8 @@
 package com.dexreload;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import dalvik.system.DexClassLoader;
@@ -97,15 +100,23 @@ public class MainActivity extends BaseActivity
 
         try
         {
-            Class<?> UiTool = dexClassLoader.loadClass("com.dex.UiTool");
-            Constructor constructor = UiTool.getConstructor();
-            Object uiTool = constructor.newInstance();
+            Class<?> DynamicalActivity = dexClassLoader.loadClass("com.dex.DynamicalActivity");
+            Field resourceField=DynamicalActivity.getDeclaredField("mResources");
+            resourceField.setAccessible(true);
+            resourceField.set(DynamicalActivity,mResources);
 
-            /*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
-            UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
-
-            Drawable drawable = uiToolInterface.getDrawable(this);
-            view.setBackground(drawable);
+            Field themeField=DynamicalActivity.getDeclaredField("mTheme");
+            themeField.setAccessible(true);
+            themeField.set(DynamicalActivity,mTheme);
+            //Class<?> UiTool = dexClassLoader.loadClass("com.dex.UiTool");
+            //Constructor constructor = UiTool.getConstructor();
+            //Object uiTool = constructor.newInstance();
+            //
+            ///*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
+            //UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
+            //
+            //Drawable drawable = uiToolInterface.getDrawable(this);
+            //view.setBackground(drawable);
         }
         catch (Exception e)
         {
@@ -113,7 +124,20 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    public void reload(View view)
+    public void open(View view)
     {
+        DexClassLoader dexClassLoader=new DexClassLoader(mEntityFilePath+"/"+ENTITY,mEntityFilePath,null,getClassLoader());
+        new ReplaceLoader().loadApkClassLoader(this,dexClassLoader);
+
+        Intent intent = new Intent();
+        intent.setClassName(getApplicationContext(),"com.dex.DynamicalActivity");
+        try
+        {
+            startActivity(intent);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

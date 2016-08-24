@@ -1,7 +1,9 @@
 package com.dex;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
 /**
  * Created by Administrator on 2016/8/19.
@@ -20,5 +22,12 @@ public class UiTool implements UiToolInterface
     public Drawable getDrawable(Context context)
     {
         return context.getResources().getDrawable(R.drawable.dogs);
+    }
+
+    @Override
+    public View getLayout(Activity context,String layoutName)
+    {
+        int id = context.getResources().getIdentifier(layoutName, "layout", context.getPackageName());
+        return context.getLayoutInflater().inflate(id, null);
     }
 }

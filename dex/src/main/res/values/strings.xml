@@ -1,0 +1,3 @@
+<resources>
+    <string name="i_am_loaded_dynamically">i am loaded dynamically</string>
+</resources>

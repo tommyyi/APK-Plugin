@@ -1,0 +1,63 @@
+package com.dexreload;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.util.ArrayMap;
+import android.util.Log;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import dalvik.system.DexClassLoader;
+
+/**
+ * Created by Administrator on 2016/8/24.
+ */
+public class ReplaceLoader
+{
+    /**
+     * 使得未安装的apk包的activity，像正常的activity一样有生命周期
+     * @param activity
+     * @param dLoader 加载未安装apk的加载器
+     */
+    @SuppressLint("NewApi")
+    public void loadApkClassLoader(Activity activity, DexClassLoader dLoader)
+    {
+        try
+        {
+            String packageName = activity.getPackageName();//当前apk的包名
+
+            /*类名-》加载的类*/
+            Class<?> ActivityThread = activity.getClassLoader().loadClass("android.app.ActivityThread");
+            /*加载的类-》类的方法*/
+            Method currentActivityThreadMethod = ActivityThread.getMethod("currentActivityThread");
+            /*类的方法+加载的类-》调用类的静态函数-》类的实例（这个静态方法返回了一个实例）*/
+            Object activityThread = currentActivityThreadMethod.invoke(ActivityThread);
+
+            /*加载的类+属性名称-》属性*/
+            Field mPackagesField = ActivityThread.getDeclaredField("mPackages");
+            mPackagesField.setAccessible(true);
+
+            /*属性+类的实例-》属性值*/
+            ArrayMap mPackages = (ArrayMap) mPackagesField.get(activityThread);
+            WeakReference weakReference = (WeakReference)mPackages.get(packageName);
+
+            /*类名-》加载的类*/
+            Class<?> LoadedApk = activity.getClassLoader().loadClass("android.app.LoadedApk");
+            /*加载的类+属性名-》属性*/
+            Field mClassLoader=LoadedApk.getDeclaredField("mClassLoader");
+            mClassLoader.setAccessible(true);
+            Object loadedApk = weakReference.get();
+            /*属性+类的实例-》设置属性*/
+            mClassLoader.set(loadedApk,dLoader);
+
+            Log.i("demo", "classloader:" + dLoader);
+        }
+        catch (Exception e)
+        {
+            Log.i("demo", "load apk classloader error:" + Log.getStackTraceString(e));
+        }
+    }
+}
