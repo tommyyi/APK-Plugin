@@ -2,7 +2,6 @@ package com.dexreload;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import dalvik.system.DexClassLoader;
@@ -23,11 +23,13 @@ public class MainActivity extends BaseActivity
 {
     private static final String ENTITY1_APK = "dex-debug1.apk";
     private static final String ENTITY2_APK = "dex-debug2.apk";
-    private static final String ENTITY = "dex-debug.apk";
+    private static final String ENTITY_APK = "dex-debug.apk";
+    private static final String ENTITY_DEX = "dex-debug.dex";
     private String mEntityFilePath;
 
     DexClassLoader dexClassLoader1;
     DexClassLoader dexClassLoader2;
+    private DexClassLoader mDexClassLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -40,7 +42,10 @@ public class MainActivity extends BaseActivity
         {
             public void run()
             {
-                copyEntity(ENTITY);
+                clean(ENTITY_APK);
+                clean(ENTITY_DEX);
+                copyEntity(ENTITY_APK);
+                mDexClassLoader = new DexClassLoader(mEntityFilePath+"/"+ ENTITY_APK,mEntityFilePath,null,getClassLoader());
             }
         };
         new Thread(runnable).start();
@@ -95,12 +100,11 @@ public class MainActivity extends BaseActivity
 
     public void load(View view)
     {
-        DexClassLoader dexClassLoader=new DexClassLoader(mEntityFilePath+"/"+ENTITY,mEntityFilePath,null,getClassLoader());
-        loadResources(mEntityFilePath+"/"+ENTITY);
+        loadResources(mEntityFilePath+"/"+ ENTITY_APK);
 
         try
         {
-            Class<?> DynamicalActivity = dexClassLoader.loadClass("com.dex.DynamicalActivity");
+            Class<?> DynamicalActivity = mDexClassLoader.loadClass("com.dex.DynamicalActivity");
             Field resourceField=DynamicalActivity.getDeclaredField("mResources");
             resourceField.setAccessible(true);
             resourceField.set(DynamicalActivity,mResources);
@@ -108,15 +112,12 @@ public class MainActivity extends BaseActivity
             Field themeField=DynamicalActivity.getDeclaredField("mTheme");
             themeField.setAccessible(true);
             themeField.set(DynamicalActivity,mTheme);
-            //Class<?> UiTool = dexClassLoader.loadClass("com.dex.UiTool");
-            //Constructor constructor = UiTool.getConstructor();
-            //Object uiTool = constructor.newInstance();
-            //
-            ///*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
-            //UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
-            //
-            //Drawable drawable = uiToolInterface.getDrawable(this);
-            //view.setBackground(drawable);
+
+            Field assetManagerField=DynamicalActivity.getDeclaredField("mAssetManager");
+            assetManagerField.setAccessible(true);
+            assetManagerField.set(DynamicalActivity,mAssetManager);
+
+            testResourceLoadFromNotInstalledAPK(mDexClassLoader,view);
         }
         catch (Exception e)
         {
@@ -124,15 +125,55 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    private void testResourceLoadFromNotInstalledAPK(DexClassLoader dexClassLoader,View view)
+    {
+        try
+        {
+            Class<?> UiTool = dexClassLoader.loadClass("com.dex.UiTool");
+            Constructor constructor = UiTool.getConstructor();
+            Object uiTool = constructor.newInstance();
+
+        /*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
+            UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
+
+            Drawable drawable = uiToolInterface.getDrawable(this);
+            view.setBackground(drawable);
+        }
+        catch (ClassNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        catch (NoSuchMethodException e)
+        {
+            e.printStackTrace();
+        }
+        catch (InstantiationException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+        catch (InvocationTargetException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public void open(View view)
     {
-        DexClassLoader dexClassLoader=new DexClassLoader(mEntityFilePath+"/"+ENTITY,mEntityFilePath,null,getClassLoader());
-        new ReplaceLoader().loadApkClassLoader(this,dexClassLoader);
+        ReplaceLoader2AppendDex loader = new ReplaceLoader2AppendDex();
+        loader.appendApk(this,mDexClassLoader);
 
         Intent intent = new Intent();
         intent.setClassName(getApplicationContext(),"com.dex.DynamicalActivity");
         try
         {
+            Class<?> DynamicalActivity = mDexClassLoader.loadClass("com.dex.DynamicalActivity");
+            Field mDexClassLoaderField=DynamicalActivity.getDeclaredField("mDexClassLoader");
+            mDexClassLoaderField.setAccessible(true);
+            mDexClassLoaderField.set(DynamicalActivity,mDexClassLoader);
             startActivity(intent);
         }
         catch (Exception e)

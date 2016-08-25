@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 
 public class BaseActivity extends AppCompatActivity
 {
-    private AssetManager mAssetManager;
+    public AssetManager mAssetManager;
     public Resources mResources;
     public Resources.Theme mTheme;
 
