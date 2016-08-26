@@ -90,8 +90,8 @@ public class MainActivity extends BaseActivity
 
     public void openActivityFromPlugin(View view)
     {
-        Intent intent = new Intent();
-        intent.setClassName(getApplicationContext(),Plugin.LAUNCHER_ACTIVITY);
-        startActivity(intent);
-    }
+            Intent intent = new Intent();
+            intent.setClassName(getApplicationContext(),Plugin.LAUNCHER_ACTIVITY);
+            startActivity(intent);
+        }
 }
