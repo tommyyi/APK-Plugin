@@ -39,22 +39,12 @@ public class MainActivity extends BaseActivity
                     Plugin.getPlugin(getApplicationContext()).LoadPlugin();
                     Plugin.getPlugin(getApplicationContext()).initLauncherActivity();
                 }
-                catch (ClassNotFoundException e)
-                {
-                    e.printStackTrace();
-                }
-                catch (NoSuchFieldException e)
-                {
-                    e.printStackTrace();
-                }
-                catch (IllegalAccessException e)
+                catch (Exception e)
                 {
                     e.printStackTrace();
                 }
             }
         }).start();
-        //openActivityFromPlugin(null);
-        //finish();
     }
 
     private void print(DexClassLoader dexClassLoader)
