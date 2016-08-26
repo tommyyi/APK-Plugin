@@ -6,14 +6,14 @@
     <Button
         android:layout_marginTop="50dp"
         android:layout_gravity="center_horizontal"
-        android:onClick="loadBackground"
+        android:onClick="loadBackgroundFromPlugin"
         android:text="load"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <Button
         android:layout_marginTop="50dp"
         android:layout_gravity="center_horizontal"
-        android:onClick="open"
+        android:onClick="openActivityFromPlugin"
         android:text="open activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
