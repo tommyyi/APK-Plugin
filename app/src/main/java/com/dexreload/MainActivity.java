@@ -2,9 +2,11 @@ package com.dexreload;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.dex.UiToolInterface;
 
@@ -35,7 +37,6 @@ public class MainActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
         mEntityFilePath = getFilesDir().getAbsolutePath();
 
         Runnable runnable = new Runnable()
@@ -45,7 +46,39 @@ public class MainActivity extends BaseActivity
                 clean(ENTITY_APK);
                 clean(ENTITY_DEX);
                 copyEntity(ENTITY_APK);
-                mDexClassLoader = new DexClassLoader(mEntityFilePath+"/"+ ENTITY_APK,mEntityFilePath,null,getClassLoader());
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        try
+                        {
+                            mDexClassLoader = new DexClassLoader(mEntityFilePath+"/"+ ENTITY_APK,mEntityFilePath,null,getClassLoader());
+                            Plugin loader = new Plugin();
+                            loader.appendDex2Standard(MainActivity.this,mDexClassLoader);
+                            loadPluginResources(mEntityFilePath+"/"+ ENTITY_APK);
+
+                            Class<?> DynamicalActivity = mDexClassLoader.loadClass("com.dex.DynamicalActivity");
+                            Field resourceField=DynamicalActivity.getDeclaredField("mResources");
+                            resourceField.setAccessible(true);
+                            resourceField.set(DynamicalActivity,mResources);
+
+                            Field themeField=DynamicalActivity.getDeclaredField("mTheme");
+                            themeField.setAccessible(true);
+                            themeField.set(DynamicalActivity,mTheme);
+
+                            Field assetManagerField=DynamicalActivity.getDeclaredField("mAssetManager");
+                            assetManagerField.setAccessible(true);
+                            assetManagerField.set(DynamicalActivity,mAssetManager);
+
+                            setContentView(R.layout.main);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         };
         new Thread(runnable).start();
@@ -98,25 +131,10 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    public void load(View view)
+    public void loadBackground(View view)
     {
-        loadResources(mEntityFilePath+"/"+ ENTITY_APK);
-
         try
         {
-            Class<?> DynamicalActivity = mDexClassLoader.loadClass("com.dex.DynamicalActivity");
-            Field resourceField=DynamicalActivity.getDeclaredField("mResources");
-            resourceField.setAccessible(true);
-            resourceField.set(DynamicalActivity,mResources);
-
-            Field themeField=DynamicalActivity.getDeclaredField("mTheme");
-            themeField.setAccessible(true);
-            themeField.set(DynamicalActivity,mTheme);
-
-            Field assetManagerField=DynamicalActivity.getDeclaredField("mAssetManager");
-            assetManagerField.setAccessible(true);
-            assetManagerField.set(DynamicalActivity,mAssetManager);
-
             testResourceLoadFromNotInstalledAPK(mDexClassLoader,view);
         }
         catch (Exception e)
@@ -136,7 +154,7 @@ public class MainActivity extends BaseActivity
         /*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
             UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
 
-            Drawable drawable = uiToolInterface.getDrawable(this);
+            Drawable drawable = uiToolInterface.getDrawable(mResources);
             view.setBackground(drawable);
         }
         catch (ClassNotFoundException e)
@@ -163,9 +181,6 @@ public class MainActivity extends BaseActivity
 
     public void open(View view)
     {
-        ReplaceLoader2AppendDex loader = new ReplaceLoader2AppendDex();
-        loader.appendApk(this,mDexClassLoader);
-
         Intent intent = new Intent();
         intent.setClassName(getApplicationContext(),"com.dex.DynamicalActivity");
         try
@@ -180,5 +195,10 @@ public class MainActivity extends BaseActivity
         {
             e.printStackTrace();
         }
+    }
+
+    private void checkResource()
+    {
+        AssetManager assetManager = getResources().getAssets();
     }
 }

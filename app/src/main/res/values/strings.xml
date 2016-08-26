@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DexReload</string>
+    <string name="resource_is_loaded">resource is loaded</string>
 </resources>

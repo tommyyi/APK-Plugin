@@ -2,6 +2,7 @@ package com.dex;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -15,13 +16,13 @@ public class UiTool implements UiToolInterface
     }
 
     /**
-     * @param context 被重载了getResources的activity，持有插件APK的resource对象
+     * @param resources 插件APK的resource对象
      * @return
      */
     @Override
-    public Drawable getDrawable(Context context)
+    public Drawable getDrawable(Resources resources)
     {
-        return context.getResources().getDrawable(R.drawable.dogs);
+        return resources.getDrawable(R.drawable.dogs);
     }
 
     @Override

@@ -19,7 +19,7 @@ import dalvik.system.DexClassLoader;
 /**
  * Created by Administrator on 2016/8/24.
  */
-public class ReplaceLoader2AppendDex
+public class Plugin
 {
     /**
      * 使得未安装的apk包的activity，像正常的activity一样有生命周期
@@ -27,7 +27,7 @@ public class ReplaceLoader2AppendDex
      * @param dLoader 加载未安装apk的加载器
      */
     @SuppressLint("NewApi")
-    public void appendApk(Activity activity, DexClassLoader dLoader)
+    public void appendDex2Standard(Activity activity, DexClassLoader dLoader)
     {
         try
         {

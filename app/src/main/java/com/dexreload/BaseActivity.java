@@ -3,11 +3,10 @@ package com.dexreload;
 import android.app.Activity;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.support.v7.app.AppCompatActivity;
 
 import java.lang.reflect.Method;
 
-public class BaseActivity extends AppCompatActivity
+public class BaseActivity extends Activity
 {
     public AssetManager mAssetManager;
     public Resources mResources;
@@ -17,7 +16,7 @@ public class BaseActivity extends AppCompatActivity
      * 加载插件资源
      * @param dexPath
      */
-    public void loadResources(String dexPath)
+    public void loadPluginResources(String dexPath)
     {
         try
         {
@@ -38,7 +37,7 @@ public class BaseActivity extends AppCompatActivity
         mTheme.setTo(super.getTheme());
     }
 
-    @Override
+    /*@Override
     public AssetManager getAssets()
     {
         return mAssetManager == null ? super.getAssets() : mAssetManager;
@@ -54,5 +53,5 @@ public class BaseActivity extends AppCompatActivity
     public Resources.Theme getTheme()
     {
         return mTheme == null ? super.getTheme() : mTheme;
-    }
+    }*/
 }

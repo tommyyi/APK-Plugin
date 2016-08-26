@@ -6,6 +6,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,7 @@ import java.util.zip.Inflater;
 
 import dalvik.system.DexClassLoader;
 
-public class DynamicalActivity extends Activity
+public class DynamicalActivity extends AppCompatActivity
 {
     public static DexClassLoader mDexClassLoader;
     public static Resources mResources;
@@ -31,6 +32,10 @@ public class DynamicalActivity extends Activity
         super.attachBaseContext(context);
     }
 
+    /**
+     * if you use context.getClass(), this will be not ok, you SHOULD use loadClass
+     * @param context
+     */
     private void replaceContext(Context context)
     {
         try
@@ -72,6 +77,7 @@ public class DynamicalActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dynamical);
 

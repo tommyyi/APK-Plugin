@@ -2,6 +2,7 @@ package com.dex;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -10,6 +11,6 @@ import android.view.View;
  */
 public interface UiToolInterface
 {
-    Drawable getDrawable(Context context);
+    Drawable getDrawable(Resources resources);
     View getLayout(Activity context, String layoutName);
 }
