@@ -129,7 +129,7 @@ public class Plugin
     public void LoadPlugin()
     {
         clean(ENTITY_APK);
-        //clean(ENTITY_DEX);
+        clean(ENTITY_DEX);
         if (!new File(mPluginFilePath, ENTITY_APK).exists())
         {
             copy(ENTITY_APK);

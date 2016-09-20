@@ -22,8 +22,8 @@ public class HostApplication extends Application
         super.onCreate();
         try
         {
-            Plugin.getPlugin(getApplicationContext()).LoadPlugin();
-            Plugin.getPlugin(getApplicationContext()).initLauncherActivity();
+            //Plugin.getPlugin(getApplicationContext()).LoadPlugin();
+            //Plugin.getPlugin(getApplicationContext()).initLauncherActivity();
 
             /*DexClassLoader dexClassLoader = Plugin.getPlugin(getApplicationContext()).getDexClassLoader();
             Class YueApplication=dexClassLoader.loadClass("com.xk.m.YueApplication");
