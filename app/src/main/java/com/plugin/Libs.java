@@ -22,7 +22,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Created by Administrator on 2016/8/26.
+ * currently, it is not used
  */
 public class Libs
 {

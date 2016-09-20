@@ -25,7 +25,7 @@ public class HostApplication extends Application
             Plugin.getPlugin(getApplicationContext()).LoadPlugin();
             Plugin.getPlugin(getApplicationContext()).initLauncherActivity();
 
-            DexClassLoader dexClassLoader = Plugin.getPlugin(getApplicationContext()).getDexClassLoader();
+            /*DexClassLoader dexClassLoader = Plugin.getPlugin(getApplicationContext()).getDexClassLoader();
             Class YueApplication=dexClassLoader.loadClass("com.xk.m.YueApplication");
             Constructor constructor = YueApplication.getConstructor();
             Object instance = constructor.newInstance();
@@ -34,7 +34,7 @@ public class HostApplication extends Application
             setContext.invoke(instance,getApplicationContext());
 
             Method onCreate=YueApplication.getDeclaredMethod("onCreate");
-            onCreate.invoke(instance);
+            onCreate.invoke(instance);*/
         }
         catch (Exception e)
         {

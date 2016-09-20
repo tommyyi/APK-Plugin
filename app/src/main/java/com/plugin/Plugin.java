@@ -102,6 +102,7 @@ public class Plugin
 
     /**
      * 加载插件资源
+     * 执行完成后，mResources可以用于加载插件APK中的资源
      *
      * @param dexPath
      */
@@ -128,8 +129,11 @@ public class Plugin
     public void LoadPlugin()
     {
         clean(ENTITY_APK);
-        clean(ENTITY_DEX);
-        copy(ENTITY_APK);
+        //clean(ENTITY_DEX);
+        if (!new File(mPluginFilePath, ENTITY_APK).exists())
+        {
+            copy(ENTITY_APK);
+        }
 
         mDexClassLoader = new DexClassLoader(mPluginFilePath + "/" + ENTITY_APK, mPluginFilePath, null, mContext.getClassLoader());
 
@@ -150,7 +154,9 @@ public class Plugin
     }
 
     /**
+     * 将持有插件dex的classloader放在标准的配置位置
      * 使得未安装的apk包的activity，像正常的activity一样有生命周期
+     * （当然该activity申明在manifest当中，你可以预置很多的activity申明在manifest当中）
      */
     @SuppressLint("NewApi")
     private void appendDex2Standard()

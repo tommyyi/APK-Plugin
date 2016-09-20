@@ -11,11 +11,19 @@
     android:paddingTop="@dimen/activity_vertical_margin">
 
     <TextView
+        android:id="@+id/message"
         android:onClick="showToast"
         android:layout_centerInParent="true"
         android:textSize="28sp"
         android:text="@string/i_am_loaded_dynamically"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:layout_below="@+id/message"
+        android:src="@drawable/dogs"
+        android:onClick="showToast"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

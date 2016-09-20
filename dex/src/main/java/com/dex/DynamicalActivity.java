@@ -28,6 +28,8 @@ public class DynamicalActivity extends AppCompatActivity
 
     /**
      * if you use context.getClass(), this will be not ok, you SHOULD use loadClass
+     * 插件只能使用宿主APK中初始化的指向插件的mResources，因为再这个位置mContext.getClassLoader()t还不可用
+     * 由于mContext.getClassLoader()不可用，无法生成mDexClassLoader，进而无法生成loadClass
      * @param context
      */
     private void replaceContext(Context context)
