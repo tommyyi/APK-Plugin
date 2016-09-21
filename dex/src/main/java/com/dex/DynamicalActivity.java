@@ -1,5 +1,6 @@
 package com.dex;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
@@ -139,6 +140,13 @@ public class DynamicalActivity extends AppCompatActivity
 
     public void showToast(View view)
     {
-        Toast.makeText(getBaseContext(), R.string.i_am_loaded_dynamically, Toast.LENGTH_LONG).show();
+        //Toast.makeText(getBaseContext(), R.string.i_am_loaded_dynamically, Toast.LENGTH_LONG).show();
+
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle(R.string.title);
+        builder.setMessage(R.string.i_am_loaded_dynamically);
+        builder.setPositiveButton("OK",null);
+        builder.setNegativeButton("Cancel",null);
+        builder.create().show();
     }
 }

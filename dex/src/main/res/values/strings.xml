@@ -1,3 +1,4 @@
 <resources>
     <string name="i_am_loaded_dynamically">i am loaded dynamically</string>
+    <string name="title">插件弹出的消息</string>
 </resources>
