@@ -3,7 +3,6 @@ package com.plugin;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -145,7 +144,7 @@ public class Plugin
         //libPath = mPluginFilePath+"/lib";
         mDexClassLoader = new DexClassLoader(dexPath, mPluginFilePath, libPath, mContext.getClassLoader());
 
-        appendDex2Standard();
+        appendDex2LoadedAPK();
         loadPluginResources(dexPath);
     }
 
@@ -178,7 +177,7 @@ public class Plugin
      * 然后在初始化时执行插件的applicaiton初始化操作
      */
     @SuppressLint("NewApi")
-    private void appendDex2Standard()
+    private void appendDex2LoadedAPK()
     {
         try
         {
