@@ -270,7 +270,7 @@ public class Plugin
             loadPluginResources(mPluginFilePath + "/" + ENTITY_APK);
             setRes(LoadedApk, loadedApk);
 
-            /*下面的代码实际上是将宿主应用程序的Application（这里是HostApplication）的mBase的mResource也设置为插件的Resource*/
+            /*下面的代码实际上是将宿主应用程序的Application（这里是HostApplication）的mBase的mResource也设置为插件的Resource，插件APP中将会有大量的对象会使用该mbase*/
             Class<?> ContextWrapper = mContext.getClassLoader().loadClass("android.content.ContextWrapper");
             Class<?> ContextImpl = mContext.getClassLoader().loadClass("android.app.ContextImpl");
             Field field = ContextWrapper.getDeclaredField("mBase");
