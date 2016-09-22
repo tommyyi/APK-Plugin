@@ -8,7 +8,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import net.steamcrafted.loadtoast.LoadToast;
 
 import java.lang.reflect.Field;
 
@@ -21,10 +24,16 @@ public class DynamicalActivity extends AppCompatActivity
     //public static Resources.Theme mTheme;
     //public static AssetManager mAssetManager;
 
+    /**
+     * @param context
+     * 如果只是想使这个Activity插件化，可以在这里调用replaceContext，将
+     * 这个activity的context的resource替换成插件的resource
+     *
+     */
     @Override
     protected void attachBaseContext(Context context)
     {
-        replaceContext(context);
+        //replaceContext(context);
         super.attachBaseContext(context);
     }
 
@@ -100,6 +109,7 @@ public class DynamicalActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dynamical);
 
+        TextView textView=(TextView)findViewById(R.id.message);
         Log.e("lifeCycle", "onCreate");
     }
 
@@ -148,5 +158,7 @@ public class DynamicalActivity extends AppCompatActivity
         builder.setPositiveButton("OK",null);
         builder.setNegativeButton("Cancel",null);
         builder.create().show();
+
+        new LoadToast(this).setText("").setTranslationY(100).show();
     }
 }

@@ -5,7 +5,8 @@ android {
     buildToolsVersion '23.0.3'
 
     defaultConfig {
-        applicationId "com.dexreload"
+        applicationId "com.xk.tianlaizhisheng2"
+//        applicationId "abridge.cn"
         minSdkVersion 16
         versionCode 1
         versionName "1.0"

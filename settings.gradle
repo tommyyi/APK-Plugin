@@ -1,1 +1,3 @@
 include ':app', ':dex'
+include ':libLoadingToast'
+project(':libLoadingToast').projectDir = new File('D:\\CODE\\MusicAPP\\loadtoast-master\\loadtoast')

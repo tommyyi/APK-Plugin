@@ -16,18 +16,20 @@ import dalvik.system.DexClassLoader;
 
 public class MainActivity extends BaseActivity
 {
-    private static final String ENTITY1_APK = "dex-debug1.apk";
-    private static final String ENTITY2_APK = "dex-debug2.apk";
+    //private static final String LAUNCHER = "com.dex.DynamicalActivity";
+    private static final String LAUNCHER = "com.yueyinyue.home.tianlaizhisheng.MainActivity";
+    //private static final String ENTITY1_APK = "dex-debug1.apk";
+    //private static final String ENTITY2_APK = "dex-debug2.apk";
 
-    DexClassLoader dexClassLoader1;
-    DexClassLoader dexClassLoader2;
+    //DexClassLoader dexClassLoader1;
+    //DexClassLoader dexClassLoader2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         //setTheme(android.R.style.Theme_DeviceDefault_NoActionBar_TranslucentDecor);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        //setContentView(R.layout.main);
 
         new Thread(new Runnable()
         {
@@ -36,8 +38,12 @@ public class MainActivity extends BaseActivity
             {
                 try
                 {
-                    Plugin.getPlugin(getApplicationContext()).LoadPlugin();
-                    Plugin.getPlugin(getApplicationContext()).initLauncherActivity();
+                    //Plugin.getPlugin(getApplicationContext()).LoadPlugin();
+                    //Plugin.getPlugin(getApplicationContext()).initLauncherActivity();
+
+                    Intent intent = new Intent();
+                    intent.setClassName(getApplicationContext(), LAUNCHER);
+                    startActivity(intent);
                 }
                 catch (Exception e)
                 {
@@ -69,15 +75,17 @@ public class MainActivity extends BaseActivity
         {
             Resources resources = Plugin.getPlugin(getApplicationContext()).getResources();
             DexClassLoader dexClassLoader = Plugin.getPlugin(getApplicationContext()).getDexClassLoader();
-            if(dexClassLoader==null||resources==null)
+            if (dexClassLoader == null || resources == null)
+            {
                 return;
+            }
 
             Class<?> UiTool = dexClassLoader.loadClass("com.dex.UiTool");
             Constructor constructor = UiTool.getConstructor();
             Object uiTool = constructor.newInstance();
 
         /*宿主中的接口定义要和主程序中的接口定义一样，包括package的路径*/
-            UiToolInterface uiToolInterface= (UiToolInterface) uiTool;
+            UiToolInterface uiToolInterface = (UiToolInterface) uiTool;
 
             Drawable drawable = uiToolInterface.getDrawable(resources);
             view.setBackground(drawable);
@@ -90,8 +98,8 @@ public class MainActivity extends BaseActivity
 
     public void openActivityFromPlugin(View view)
     {
-            Intent intent = new Intent();
-            intent.setClassName(getApplicationContext(),Plugin.LAUNCHER_ACTIVITY);
-            startActivity(intent);
-        }
+        Intent intent = new Intent();
+        intent.setClassName(getApplicationContext(), Plugin.LAUNCHER_ACTIVITY);
+        startActivity(intent);
+    }
 }

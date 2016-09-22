@@ -11,11 +11,14 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import dalvik.system.DexClassLoader;
@@ -121,8 +124,8 @@ public class Plugin
         superRes.getDisplayMetrics();
         superRes.getConfiguration();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
-        mTheme = mResources.newTheme();
-        mTheme.setTo(mContext.getTheme());
+        //mTheme = mResources.newTheme();
+        //mTheme.setTo(mContext.getTheme());
     }
 
     /**
@@ -138,17 +141,74 @@ public class Plugin
             copy(ENTITY_APK);
         }
 
-        String libPath=null;
+        String libPath = null;
         String dexPath = mPluginFilePath + "/" + ENTITY_APK;
-        //Libs.UnzipSpecificFile(dexPath,mPluginFilePath,null);
-        //libPath = mPluginFilePath+"/lib";
+        //Libs.UnzipSpecificFile(dexPath, mPluginFilePath, null);
+        //libPath = mPluginFilePath + "/lib/armeabi";
+        libPath = mPluginFilePath.replace("/files", "/lib");
         mDexClassLoader = new DexClassLoader(dexPath, mPluginFilePath, libPath, mContext.getClassLoader());
 
-        appendDex2LoadedAPK();
-        loadPluginResources(dexPath);
+        fixLoadedAPK();
     }
 
-    public void initLauncherActivity() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException
+    private void copylib(String libPath)
+    {
+        File libmg20pbase = new File(mPluginFilePath + "/lib/armeabi/libmg20pbase.so");
+        File desFile = new File(mPluginFilePath.replace("/files", "/lib/armeabi") + "/libmg20pbase.so");
+        FileInputStream fileInputStream;
+        FileOutputStream fileOutputStream;
+
+        File lib = new File("/data/data/com.xk.tianlaizhisheng2/lib");
+        boolean result;
+        if (!lib.exists())
+        {
+            result=lib.mkdir();
+        }
+        lib = new File("/data/data/com.xk.tianlaizhisheng2/lib/armeabi");
+        if (!lib.exists())
+        {
+            result=lib.mkdir();
+        }
+
+        try
+        {
+            desFile.createNewFile();
+            fileInputStream = new FileInputStream(libmg20pbase);
+            fileOutputStream = new FileOutputStream(desFile);
+            byte[] buffer = new byte[fileInputStream.available()];
+            fileInputStream.read(buffer);
+            fileOutputStream.write(buffer);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        libmg20pbase = new File(mPluginFilePath + "/lib/armeabi/libmusicopen.so");
+        desFile = new File(mPluginFilePath.replace("/files", "/lib/armeabi") + "/libmusicopen.so");
+        try
+        {
+            fileInputStream = new FileInputStream(libmg20pbase);
+            fileOutputStream = new FileOutputStream(desFile);
+            byte[] buffer = new byte[fileInputStream.available()];
+            fileInputStream.read(buffer);
+            fileOutputStream.write(buffer);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void initPlugin(Context context) throws Exception
+    {
+        Class<?> PluginApplication = mDexClassLoader.loadClass("com.plugin.PluginApplication");
+        Method init = PluginApplication.getMethod("init", Context.class);
+        init.setAccessible(true);
+        init.invoke(null, context);
+    }
+
+    private void initLauncherActivity() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException
     {
         Class<?> DynamicalActivity = mDexClassLoader.loadClass(LAUNCHER_ACTIVITY);
         Field resourceField = DynamicalActivity.getDeclaredField(LAUNCHER_ACTIVITY_RESOURCES);
@@ -164,20 +224,20 @@ public class Plugin
      * 将持有插件dex的classloader放在标准的配置位置
      * 使得未安装的apk包的activity，像正常的activity一样有生命周期
      * （当然该activity申明在manifest当中，你可以预置很多的activity申明在manifest当中）
-     *
+     * <p/>
      * LoadedApk中包含有
      * mAppDir（"/data/app/com.dexreload-2/base.apk"）、
      * mClassLoader（{PathClassLoader@3625} "dalvik.system.PathClassLoader[DexPathList[[zip file "/data/app/com.dexreload-2/base.apk"],nativeLibraryDirectories=[/vendor/lib, /system/lib]]]"）、
      * mLibDir（"/data/app/com.dexreload-2/lib/arm"）、
      * mResDir（"/data/app/com.dexreload-2/base.apk"）、
      * mResources（{Resources@3632}）
-     *
+     * <p/>
      * 可以在application初始化阶段把mClassLoader、mLibDir、mResDir、mResources修改成插件的对应信息
      * 这样的话是否LoadedApk就完全指向了插件，后续产生的activity等的context是否就也完全指向了插件
      * 然后在初始化时执行插件的applicaiton初始化操作
      */
     @SuppressLint("NewApi")
-    private void appendDex2LoadedAPK()
+    private void fixLoadedAPK()
     {
         try
         {
@@ -201,18 +261,69 @@ public class Plugin
             /*类名-》加载的类*/
             Class<?> LoadedApk = mContext.getClassLoader().loadClass("android.app.LoadedApk");
             /*加载的类+属性名-》属性*/
-            Field mClassLoader = LoadedApk.getDeclaredField("mClassLoader");
-            mClassLoader.setAccessible(true);
             Object loadedApk = weakReference.get();
-            /*属性+类的实例-》设置属性*/
-            mClassLoader.set(loadedApk, mDexClassLoader);
 
-            Log.i("demo", "classloader:" + mDexClassLoader);
+            setClassLoader(LoadedApk, loadedApk);
+            setLibDir(LoadedApk, loadedApk);
+            setResDir(LoadedApk, loadedApk);
+
+            loadPluginResources(mPluginFilePath + "/" + ENTITY_APK);
+            setRes(LoadedApk, loadedApk);
+
+            /*下面的代码实际上是将宿主应用程序的Application（这里是HostApplication）的mBase的mResource也设置为插件的Resource*/
+            Class<?> ContextWrapper = mContext.getClassLoader().loadClass("android.content.ContextWrapper");
+            Class<?> ContextImpl = mContext.getClassLoader().loadClass("android.app.ContextImpl");
+            Field field = ContextWrapper.getDeclaredField("mBase");
+            field.setAccessible(true);
+            Object mBaseObject = field.get(mContext);
+            field = ContextImpl.getDeclaredField("mResources");
+            field.setAccessible(true);
+            field.set(mBaseObject, mResources);
+
+            Log.i("demo", "mResources:" + mResources);
         }
         catch (Exception e)
         {
             Log.i("demo", "load apk classloader error:" + Log.getStackTraceString(e));
         }
+    }
+
+    private void setRes(Class<?> LoadedApk, Object loadedApk) throws NoSuchFieldException, IllegalAccessException
+    {
+        /*属性+类的实例-》设置属性*/
+        Field mClassLoader = LoadedApk.getDeclaredField("mResources");
+        mClassLoader.setAccessible(true);
+        mClassLoader.set(loadedApk, mResources);
+    }
+
+    private void setClassLoader(Class<?> LoadedApk, Object loadedApk) throws NoSuchFieldException, IllegalAccessException
+    {
+    /*属性+类的实例-》设置属性*/
+        Field mClassLoader = LoadedApk.getDeclaredField("mClassLoader");
+        mClassLoader.setAccessible(true);
+        mClassLoader.set(loadedApk, mDexClassLoader);
+
+        Log.i("demo", "classloader:" + mDexClassLoader);
+    }
+
+    private void setLibDir(Class<?> LoadedApk, Object loadedApk) throws NoSuchFieldException, IllegalAccessException
+    {
+    /*属性+类的实例-》设置属性*/
+        Field mClassLoader = LoadedApk.getDeclaredField("mLibDir");
+        mClassLoader.setAccessible(true);
+        mClassLoader.set(loadedApk, mContext.getFilesDir() + "/lib/armeabi");
+
+        Log.i("demo", "mLibDir:" + mContext.getFilesDir() + "/lib/armeabi");
+    }
+
+    private void setResDir(Class<?> LoadedApk, Object loadedApk) throws NoSuchFieldException, IllegalAccessException
+    {
+    /*属性+类的实例-》设置属性*/
+        Field mClassLoader = LoadedApk.getDeclaredField("mResDir");
+        mClassLoader.setAccessible(true);
+        mClassLoader.set(loadedApk, mContext.getFilesDir().getAbsolutePath() + "/" + ENTITY_APK);
+
+        Log.i("demo", "mResDir:" + mContext.getFilesDir().getAbsolutePath() + "/" + ENTITY_APK);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
